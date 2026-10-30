@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>继教《英语2》语法练习</title>
+<style>
+  :root{
+    --primary:#4f6ef7; --primary-dark:#3a55d9; --bg:#f4f6fb; --card:#ffffff;
+    --text:#2b2f3a; --muted:#8a90a3; --green:#2eaf64; --red:#e5484d;
+    --green-bg:#e8f7ef; --red-bg:#fdecec; --border:#e4e7f0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+  .app{max-width:760px; margin:0 auto; padding:20px 16px 60px;}
+  .card{background:var(--card); border-radius:14px; box-shadow:0 2px 10px rgba(30,40,90,.06); padding:22px; margin-bottom:16px;}
+  h1{font-size:22px; margin-bottom:6px;}
+  h2{font-size:18px; margin-bottom:12px;}
+  .sub{color:var(--muted); font-size:14px; margin-bottom:18px;}
+  .btn{display:inline-block; border:none; border-radius:10px; padding:11px 20px; font-size:15px; cursor:pointer; background:var(--primary); color:#fff; transition:.15s;}
+  .btn:hover{background:var(--primary-dark);}
+  .btn.ghost{background:#eef1fb; color:var(--primary);}
+  .btn.ghost:hover{background:#e2e8fb;}
+  .btn.block{display:block; width:100%; text-align:center; margin-bottom:10px; padding:13px;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .cat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;}
+  .cat-item{border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; cursor:pointer; font-size:14px; display:flex; justify-content:space-between; align-items:center; gap:6px; transition:.15s;}
+  .cat-item:hover{border-color:var(--primary);}
+  .cat-item.on{border-color:var(--primary); background:#eef1fb; color:var(--primary); font-weight:600;}
+  .cat-item .cnt{color:var(--muted); font-size:12px; font-weight:400;}
+  .cat-item.on .cnt{color:var(--primary);}
+  .mode-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .mode-tag{border:1.5px solid var(--border); border-radius:20px; padding:7px 16px; font-size:14px; cursor:pointer;}
+  .mode-tag.on{border-color:var(--primary); background:var(--primary); color:#fff;}
+  .progress-wrap{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .progress-bar{flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden;}
+  .progress-bar i{display:block; height:100%; background:var(--primary); border-radius:4px; transition:width .25s;}
+  .qmeta{font-size:13px; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;}
+  .badge{display:inline-block; background:#eef1fb; color:var(--primary); border-radius:6px; padding:2px 8px; font-size:12px;}
+  .question{font-size:17px; line-height:1.7; margin-bottom:18px; white-space:pre-line;}
+  .opt{display:block; width:100%; text-align:left; border:1.5px solid var(--border); border-radius:10px; padding:12px 14px; font-size:15px; margin-bottom:10px; cursor:pointer; background:#fff; transition:.15s; line-height:1.5;}
+  .opt:hover:not(:disabled){border-color:var(--primary); background:#f6f8ff;}
+  .opt.correct{border-color:var(--green); background:var(--green-bg); color:var(--green); font-weight:600;}
+  .opt.wrong{border-color:var(--red); background:var(--red-bg); color:var(--red); font-weight:600;}
+  .opt:disabled{cursor:default;}
+  .explain{border-left:4px solid var(--primary); background:#f6f8ff; border-radius:0 10px 10px 0; padding:12px 14px; font-size:14px; line-height:1.7; margin:6px 0 16px; white-space:pre-line;}
+  .explain b{color:var(--primary);}
+  .nav-row{display:flex; justify-content:space-between; gap:10px;}
+  .nav-row .btn{flex:1;}
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;}
+  .stat{background:#f6f8ff; border-radius:10px; text-align:center; padding:14px 6px;}
+  .stat .num{font-size:26px; font-weight:700; color:var(--primary);}
+  .stat .lbl{font-size:12px; color:var(--muted); margin-top:4px;}
+  .stat.good .num{color:var(--green);} .stat.bad .num{color:var(--red);}
+  .review-item{border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:10px; font-size:14px; line-height:1.6;}
+  .review-item .rq{margin-bottom:6px; white-space:pre-line;}
+  .review-item .ra{color:var(--green); font-weight:600;}
+  .review-item .ru{color:var(--red); font-weight:600;}
+  .review-item .rx{color:var(--muted); font-size:13px; margin-top:4px; white-space:pre-line;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .linklike{background:none; border:none; color:var(--primary); font-size:14px; cursor:pointer; padding:4px;}
+  .empty-tip{color:var(--muted); text-align:center; padding:30px 0;}
+  @media (max-width:520px){ .cat-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* ================== 题库数据 ================== */
+/* q:题干 opts:选项数组 a:正确答案索引 x:解析 c:分类 */
+const BANK = [
+/* ---- 主谓一致与倒装 ---- */
+{c:"主谓一致与倒装",q:"Reading novels and articles ____ what I enjoy most.",o:["is","has","have","are"],a:0,x:"reading novels and articles 是动名词做本句的主语，谓语动词用单数。"},
+{c:"主谓一致与倒装",q:"Neither of us ____ to climb the mountains.",o:["will","is","are","would"],a:1,x:"neither of + 名词做主语，谓语动词用单数。"},
+{c:"主谓一致与倒装",q:"The writer and the poet ____ attending the party.",o:["will","is","are","would"],a:2,x:"the writer and the poet 表示“作家和诗人”两个人，谓语动词用复数。"},
+{c:"主谓一致与倒装",q:"The writer and poet ____ attending the party.",o:["will","is","are","would"],a:1,x:"the writer and poet 做主语，表示“一个具有作家和诗人双重身份的人”，谓语动词用单数。"},
+{c:"主谓一致与倒装",q:"Bread and milk ___ my favorite food for breakfast.",o:["is","will be","are","should be"],a:0,x:"bread and milk 视为一份食物（整体概念），谓语动词用单数。"},
+{c:"主谓一致与倒装",q:"Neither Jane nor her classmate ____ go abroad for studying.",o:["are going to","is going to","have gone to","have been to"],a:1,x:"neither...nor... 连接主语时，谓语动词遵循“就近原则”，与最近的 her classmate（单数）一致。"},
+{c:"主谓一致与倒装",q:"Either the principal or the teachers ____ the meeting.",o:["attends","is attending","has attended","attend"],a:3,x:"either...or... 连接主语时，谓语动词遵循“就近原则”，与最近的 the teachers（复数）一致。"},
+{c:"主谓一致与倒装",q:"Jerry is one of the students who ___ England.",o:["have been to","has been to","have gone to","has gone for"],a:0,x:"one of the students who... 中定语从句修饰 the students（复数），谓语用复数；have been to 表示“去过”。"},
+{c:"主谓一致与倒装",q:"George is the only one of the students who ____ England.",o:["have been to","has been to","have gone to","has gone to"],a:1,x:"the only one of the students who... 中先行词是 the only one（单数），谓语用单数。"},
+{c:"主谓一致与倒装",q:"Ten percent of the apples ____.",o:["goes bad","go bad","turn bad","turned bad"],a:1,x:"ten percent of + 名词，谓语动词与名词有关：名词是可数复数用复数，不可数用单数。the apples 是复数，go bad 表示“变坏”。"},
+{c:"主谓一致与倒装",q:"Two thirds of the forest ____.",o:["have been destroyed","has been destroyed","have destroyed","has destroyed"],a:1,x:"分数 of + 名词，谓语与名词一致。the forest 是不可数名词，用单数；且 forest 是“被毁”的，用被动语态。"},
+{c:"主谓一致与倒装",q:"To know something about the event ____ easy.",o:["is","are","were","have been"],a:0,x:"不定式短语做主语，谓语动词用单数。"},
+{c:"主谓一致与倒装",q:"The teacher, with her students, ____ discussing the environmental problem.",o:["is","are","were","who is"],a:0,x:"the teacher 是句子的主语，with 之后的名词与谓语动词没有关系（就远原则），谓语用单数。"},
+{c:"主谓一致与倒装",q:"Where to go and how to go ____ yet.",o:["have not been decided","has not been decided","have not decided","has not decided"],a:0,x:"where to go and how to go 是 and 连接的两件事，谓语动词用复数；本句表示“地点和方式没有被决定”，用被动语态。"},
+{c:"主谓一致与倒装",q:"—I don't think I can finish it tonight.\n—____. Let's stop and do it tomorrow.",o:["So can I","I agree","Neither do I","Nor can I"],a:3,x:"考查“一种否定情况也发生于另一人身上”的表达：nor/neither + 助动词 + 主语，本句前句用 can，故选 Nor can I。"},
+{c:"主谓一致与倒装",q:"He likes swimming. ____.",o:["So I do","Nor do I","Nor I do","So do I"],a:3,x:"so + 助动词 + 主语，表示“（另一人）也如此”，是对上一句情况的重复。"},
+{c:"主谓一致与倒装",q:"No sooner ____ than I heard the ringing of the telephone.",o:["I had gone out","had I gone out","did I go out","I did go out"],a:1,x:"no sooner...than 表示“一……就”，是固定搭配；no sooner 是否定词位于句首引起部分倒装。go out 发生在前，用过去完成时。"},
+{c:"主谓一致与倒装",q:"____ I you, I would tell her the truth.",o:["If were","I can","Were","Am I"],a:2,x:"if 条件句中含有 were/had/should 时可省略 if 并倒装：Were I you = If I were you（虚拟语气）。"},
+{c:"主谓一致与倒装",q:"Not until the late years of 20th century ____ WTO.",o:["China joined","did China join","China has joined","has China joined"],a:1,x:"not until 位于句首引起部分倒装；the late years of 20th century 是过去时间状语，用一般过去时，倒装后为 did China join。"},
+{c:"主谓一致与倒装",q:"What you said just now ____ me.",o:["has nothing to do with","have nothing to do with","had nothing to do with","has been nothing to do with"],a:2,x:"what you said just now 是主语从句，谓语动词用单数；have nothing to do with 表示“与……无关”，有 just now 用一般过去时。"},
+{c:"主谓一致与倒装",q:"He is a university student, ____.",o:["so I am","so am I","neither am I","neither I am"],a:1,x:"so + be/助动词 + 主语表示“另一人也如此”，需用倒装语序 so am I。"},
+{c:"主谓一致与倒装",q:"I don't like philosophy, ____.",o:["either does John","neither does John","so doesn't John","so does John"],a:1,x:"表示“某人也不……”用 neither + 助动词 + 主语（倒装）。"},
+{c:"主谓一致与倒装",q:"By no means ____ look down upon the disabled.",o:["we should","ought we to","we shall","should we"],a:3,x:"否定副词短语 by no means 位于句首引起部分倒装，应为 should we look down upon..."},
+{c:"主谓一致与倒装",q:"Hardly ____ one problem settled ____ another appeared.",o:["have I had; than","have I had; when","do I had; than","had I had; when"],a:3,x:"hardly...when 表示“一……就”，是固定搭配；hardly 位于句首引起部分倒装。appeared 是过去时，主句用过去完成时。"},
+{c:"主谓一致与倒装",q:"Busy ____ I am, I'll spend Sunday playing with my child.",o:["No matter how","because","as","not matter how"],a:2,x:"as 引导让步状语从句引起的部分倒装：busy as I am 的正常语序是 as I am busy（尽管我很忙）。"},
+{c:"主谓一致与倒装",q:"By no means ____ look down upon the disabled.",o:["we should","ought we to","we shall","should we"],a:3,x:"by no means 位于句首引起部分倒装：should we look down upon..."},
+{c:"主谓一致与倒装",q:"No sooner ____ the airport ____ the plane flew.",o:["I had reached; than","I had reached; when","had I reached; than","had I reached; when"],a:2,x:"no sooner...than 表示“一……就”，固定搭配；no 位于句首引起部分倒装。reach 发生在 fly 之前，用过去完成时。"},
+{c:"主谓一致与倒装",q:"The closer to the top of the mountain, ____.",o:["air is thinner","the thinner is air","the thinner air is","thinner is air"],a:2,x:"“the + 比较级，the + 比较级”表示“越……越”，后半句用正常陈述语序 the thinner air is。"},
+/* ---- 感叹句 ---- */
+{c:"感叹句",q:"____ from Beijing to London!",o:["How long way it is","What a long way is it","How long way is it","What a long way it is"],a:3,x:"感叹句语序：what 后接中心词为名词/代词，how 后接形容词/副词。正常语序为 it is what a long way from Beijing to London。"},
+{c:"感叹句",q:"____ happy life they are living!",o:["How","What","How a","What a"],a:3,x:"what 开头的感叹句后接名词中心词；life 是可数名词，要用冠词：what a happy life。"},
+{c:"感叹句",q:"____ wonderful weather they are having!",o:["How","What","How a","What a"],a:1,x:"what 开头的感叹句后接名词中心词；weather 是不可数名词，用零冠词：what wonderful weather。"},
+{c:"感叹句",q:"____ careless he is!",o:["What","How","How a","How much"],a:1,x:"how 后接形容词/副词中心词：how careless he is!"},
+{c:"感叹句",q:"____ beautiful the flower is!",o:["How a","What a","How","What"],a:2,x:"how 后接形容词：how beautiful the flower is!"},
+{c:"感叹句",q:"____ she gave me!",o:["What good advice","How good advice","What a good advice","How a good advice"],a:0,x:"advice 是不可数名词，用零冠词：what good advice。"},
+{c:"感叹句",q:"____ he is!",o:["How funny","What funny","What a fun","How a fun"],a:0,x:"how 后接形容词：how funny he is!（fun 为不可数名词，不能加 a）。"},
+{c:"感叹句",q:"____ handsome he is!",o:["What","How","What a","How a"],a:1,x:"how 后接形容词：how handsome he is!"},
+{c:"感叹句",q:"____ handsome boy he is!",o:["What","How","What a","How a"],a:2,x:"what 后接名词中心词，boy 是可数名词单数，要加冠词：what a handsome boy!"},
+{c:"感叹句",q:"____ she speaks Japanese!",o:["How fluent","How fluently","What fluent","What fluently"],a:1,x:"修饰动词 speaks 用副词 fluently，感叹句用 how：how fluently she speaks Japanese!"},
+/* ---- 定语从句 ---- */
+{c:"定语从句",q:"The man ____ talked to you just now is an engineer.",o:["who","which","where","when"],a:0,x:"先行词 the man 是人，且在从句中做主语，用关系代词 who。"},
+{c:"定语从句",q:"I still remember the days ___ we studied together.",o:["that","which","where","when"],a:3,x:"when 在定语从句中做时间状语，指代 the days。"},
+{c:"定语从句",q:"The ancient people used stone to build a house in ___ they stored food.",o:["who","that","which","what"],a:2,x:"定语从句关系代词用法：which 指代 house，介词 in 可以放在关系词前面（in which）。"},
+{c:"定语从句",q:"He is the cleverest boy ____ I have known.",o:["who","that","which","whom"],a:1,x:"先行词被最高级修饰时，关系代词用 that，不能用 which。"},
+{c:"定语从句",q:"The book, the cover of ____ is white, is mine.",o:["that","where","which","it"],a:2,x:"非限制性定语从句（以及“介词 + 关系代词”结构）只能用 which，不能用 that。"},
+{c:"定语从句",q:"She is one of the students who ___ the examinations.",o:["passes","pass","have passed","has passed"],a:2,x:"one of the students who... 中先行词是 the students（复数），从句谓语动词用复数形式。"},
+{c:"定语从句",q:"She is the only one of the students who ____ the examinations.",o:["passes","pass","have passed","passed"],a:0,x:"the only one of the students who... 中先行词是 the only one（单数），从句谓语动词用单数形式。"},
+{c:"定语从句",q:"All ___ glitters is not gold.",o:["which","that","who","what"],a:1,x:"all 是不定代词，定语从句只能用 that 引导，不能用 which。"},
+{c:"定语从句",q:"Hongqi is the best car ____ is made in China.",o:["which","that","and which","what"],a:1,x:"先行词被形容词最高级修饰时，只能用 that 引导定语从句。"},
+{c:"定语从句",q:"____ is well known to all, the earth is becoming warm.",o:["That","Which","What","As"],a:3,x:"as 引导的非限制性定语从句，as is well known to all（众所周知）是固定搭配。"},
+{c:"定语从句",q:"He is always late, ____ annoys me.",o:["what","that","which","who"],a:2,x:"which 在非限制性定语从句中做主语，指代前面整句话；非限制性定语从句不能用 that。"},
+{c:"定语从句",q:"The reason ____ America wants to disarm Iraq is for oil.",o:["that","which","why","on which"],a:2,x:"the reason why... 表示“……的原因”。"},
+/* ---- 非谓语动词 ---- */
+{c:"非谓语动词",q:"Don't you remember ____?",o:["seeing the man before","to see the man before","saw the man before","to have seen the man before"],a:0,x:"remember doing 表示“记住做过某事”；remember to do 表示“记住去做某事”。"},
+{c:"非谓语动词",q:"Paul from normal university practiced ____ in the middle school.",o:["to teach","to be teaching","teaching","having taught"],a:2,x:"practice doing 表示“训练做某事”，后接动名词，而不是不定式。"},
+{c:"非谓语动词",q:"I decided ____ a teacher.",o:["not to become","not to have become","to have become","to have not become"],a:0,x:"decide not to do sth. 表示“决定不去做某事”，否定词 not 放在不定式前。"},
+{c:"非谓语动词",q:"I'm glad to ____ an opportunity to interview you.",o:["give","be giving","be given","have not given"],a:2,x:"我是“被给予”机会，应用不定式被动式 to be given。"},
+{c:"非谓语动词",q:"____ a windy day, we gave up our plan to sail.",o:["With a","It being","Being","Because it being"],a:1,x:"分词独立主格结构由“名词（代词）+分词”构成：It being a windy day 表示“今天风很大”。"},
+{c:"非谓语动词",q:"I am going to have my radio ____.",o:["fixed","to fix","fix","fixing"],a:0,x:"have sth done 表示“让某事被做”，radio 与 fix 是被动关系。"},
+{c:"非谓语动词",q:"I prefer to ___ at home rather than ____.",o:["stay; camp","staying; camping","stay; to camp","staying; to camping"],a:0,x:"prefer to do rather than do 是固定搭配。"},
+{c:"非谓语动词",q:"I preferred ___ at home to ____ such a party.",o:["stay; join","staying; joining","to stay; joining","staying; join"],a:1,x:"prefer doing sth to doing sth 是固定搭配（注意这里的 to 是介词）。"},
+{c:"非谓语动词",q:"____ in front of it, this old house needs ____.",o:["To see, repairing","Seen; repairing","Having seen; making repairs","Seeing; to be repaired"],a:1,x:"house 是“被看”，用过去分词 Seen；need 后接动名词表示“某事需要被做”（needs repairing = needs to be repaired）。"},
+{c:"非谓语动词",q:"The girl kept on ___ when her mother came in.",o:["to write","to lie in bed","dancing to the music","to dance to the music"],a:2,x:"keep on doing 表示“继续做某事”，后接动名词。"},
+{c:"非谓语动词",q:"He ran away quickly ____ his friend ____ in the middle of the playground.",o:["to leave; standing","to leave; to stand","leaving; to stand","leaving; standing"],a:3,x:"leaving 是分词短语做伴随状语；leave sb doing 中 leave 是使役动词，“让某人保持某状态”。"},
+{c:"非谓语动词",q:"The boy wanted to ride his bicycle in the street, but his mother told him ____.",o:["not to","not to do","not do it","do not to"],a:0,x:"不定式的省略：省略动词保留 to。told him not to = told him not to ride his bicycle。"},
+{c:"非谓语动词",q:"I'm enjoying ____ the vacation in Qingdao with my parents last year.",o:["being spent","to have spent","having spent","having been spent"],a:2,x:"enjoy doing 表示“喜欢做某事”；last year 表示过去时间，用 having spent 表示过去已发生的事。"},
+{c:"非谓语动词",q:"Having a walk along the seaside, I felt like ____ in the sea.",o:["to go swimming","go swimming","going swimming","to go to swim"],a:2,x:"feel like doing 表示“想要做某事”，是固定搭配。"},
+{c:"非谓语动词",q:"He did nothing but ____.",o:["to read","reading","read","to have read"],a:2,x:"do nothing but do 表示“除了做某事之外什么也不做”，but 前有 do 时后接动词原形。"},
+{c:"非谓语动词",q:"I was heard ___ that I fell in love with her.",o:["say","to saying","to say","said"],a:2,x:"hear sb do 变被动后需还原 to：sb was heard to do。"},
+{c:"非谓语动词",q:"___ what you say, he is an honest man.",o:["Judging from","Judged from","Having judged","To judge"],a:0,x:"judging from/by...（ judging 从……来判断）是习惯用法，不用被动形式。"},
+{c:"非谓语动词",q:"____, the U.S. is stronger than Iraq.",o:["To speaking","Generally speaking","Generally to have spoken","Generally speak"],a:1,x:"generally speaking（总的来说）是分词短语的习惯用法。"},
+{c:"非谓语动词",q:"With night ____, they come back home.",o:["be fell","fell","falling","falls"],a:2,x:"with 复合结构：with + 名词 + 现在分词，night fall 是主动进行，用 falling。"},
+{c:"非谓语动词",q:"It is no use ____ him not to cheat in the exams.",o:["for you to have told","you tell","your telling","having told"],a:2,x:"It is no use doing sth. 固定句型，用动名词复合结构 your telling。"},
+{c:"非谓语动词",q:"—It can't work.\n—Why not ___ it in another way?",o:["try to solve","try solving","tries solving","try solve"],a:1,x:"why not do 表示“为什么不做某事”；try to do 表示“尽力做”，try doing 表示“尝试（换种方法）做”。"},
+{c:"非谓语动词",q:"The thief was caught with two hands ____.",o:["tied","to be tied","being tied","having been tied"],a:0,x:"with 独立主格结构：with + 名词 + 分词。hands 是“被绑住”，用过去分词 tied。"},
+{c:"非谓语动词",q:"John was made ____ the truck for a week as a punishment.",o:["to wash","washing","wash","to be washing"],a:0,x:"be made to do “某人被要求去做……”（主动语态 make sb do 去掉 to，被动要还原 to）。"},
+{c:"非谓语动词",q:"You'd better ___ your son ___ hard.",o:["to have; to work","have; work","have; to work","have; worked"],a:1,x:"had better do 表示“最好做某事”；have sb do 表示“让某人做某事”。"},
+{c:"非谓语动词",q:"Your hair is so long. You'd better have ____.",o:["it cut","it cutted","it cutting","it to cut"],a:0,x:"have sth done 表示“让某事被做”。"},
+{c:"非谓语动词",q:"I don't allow ___ in my office.",o:["smoking","to smoke","people to smoking","people smoking"],a:0,x:"allow doing 表示“允许做某事”；allow sb to do 表示“允许某人做某事”。"},
+{c:"非谓语动词",q:"He suggested _______ with him.",o:["going shopping","to going shopping","go shopping","to go shopping"],a:0,x:"suggest doing 表示“建议做某事”。"},
+{c:"非谓语动词",q:"When I heard from him, I couldn't help ___ .",o:["jump with joy","jumping with joy","jumping in joy","to jumping in joy"],a:1,x:"couldn't help doing 表示“忍不住做某事”。"},
+{c:"非谓语动词",q:"The officers narrowly escaped ____ in the hot battle.",o:["have killed","to kill","to be killed","being killed"],a:3,x:"escape doing 表示“避免做某事”；此处是“避免被杀”，用 escape being killed。"},
+{c:"非谓语动词",q:"The novel is worth ____.",o:["to read","of reading","reading","of to be read"],a:2,x:"be worth doing 表示“值得做某事”，固定搭配。"},
+{c:"非谓语动词",q:"People were used to ____ clothes of cotton and wool, but now more and more other materials are used to ____ clothes as well.",o:["making; making","making; make","making; make","make; make"],a:1,x:"be used to doing 表示“习惯于做某事”（to 是介词）；be used to do 表示“被用来做某事”（to 是不定式）。"},
+{c:"非谓语动词",q:"One learns a language by making mistakes and ___ them.",o:["correct","correcting","corrects","to correct"],a:1,x:"and 连接的平行结构，与 making 一致用动名词 correcting。"},
+{c:"非谓语动词",q:"When I came in, I found a cat ___ in a sofa.",o:["lie","lying","to be lying","laying"],a:1,x:"find sb/sth doing 表示“发现……正做着某事”，猫正“躺着”用 lying。"},
+{c:"非谓语动词",q:"We are looking forward to _____ fashion show next month.",o:["watch","watching","be watching","having watched"],a:1,x:"look forward to doing 表示“期望做某事”，to 是介词。"},
+{c:"非谓语动词",q:"My bike is so old that it needs ___.",o:["repair","repaired","repairing","to repair"],a:2,x:"need doing = need to be done，表示“某事需要被做”。"},
+{c:"非谓语动词",q:"I wish you'll succeed ___ him with his task.",o:["help","helping","to help","in helping"],a:3,x:"succeed in doing 表示“成功地做成某事”。"},
+{c:"非谓语动词",q:"Everyone is afraid of _______.",o:["laughing","laughing at","being laughed","being laughed at"],a:3,x:"laugh at sb 表示“嘲笑某人”，afraid of 后用动名词被动式 being laughed at。"},
+{c:"非谓语动词",q:"I have difficulty ___ the walkman.",o:["repair","in repairing","repaired","to repair"],a:1,x:"have difficulty (in) doing sth. 固定搭配。"},
+{c:"非谓语动词",q:"___ from the window, I found the city was so bright.",o:["See","Seeing","Seen","To see"],a:1,x:"分词短语做状语：I 是主句主语，也是分词的逻辑主语，“我看”是主动，用现在分词 Seeing。"},
+{c:"非谓语动词",q:"____ from the window, the city was so bright.",o:["See","Seeing","Seen","To see"],a:2,x:"the city 是主句主语，是“被看”，用过去分词 Seen 表示被动。"},
+{c:"非谓语动词",q:"Reading is ____, and I'm ____ in reading.",o:["interesting; interested","interesting; interesting","interest; interesting","interested; interesting"],a:0,x:"-ing 形容词修饰物（有意思的），-ed 形容词修饰人（感到有趣的）。"},
+{c:"非谓语动词",q:"____ to the wedding, Mr. Brown didn't mind it.",o:["Having not been invited","Not having been invited","Having not invited","Not having invited"],a:1,x:"分词的否定形式 not 放在最前面；完成被动式 Not having been invited 表示“没有被邀请”。"},
+{c:"非谓语动词",q:"He devoted his life to ___ AIDS.",o:["study","studying","learn","learning"],a:1,x:"devote oneself/one's life to doing 表示“献身于某事”，to 是介词。"},
+{c:"非谓语动词",q:"When the teacher came into classroom, these students stopped ____.",o:["talk","talking","to talking","having talking"],a:1,x:"stop doing 表示“停止正在做的事”；stop to do 表示“停下来去做另一件事”。"},
+{c:"非谓语动词",q:"I spent three years ___ a novel.",o:["write","writing","to write","writed"],a:1,x:"spend time (in) doing sth. 固定搭配。"},
+{c:"非谓语动词",q:"Please remember _____ these books after reading them.",o:["put away","to put away","putting away","to be put away"],a:1,x:"remember to do 表示“记住去做某事（还没做）”；remember doing 表示“记得做过某事”。"},
+{c:"非谓语动词",q:"My mother promised ____ me new clothes.",o:["buy","buying","to buy for","to buy"],a:3,x:"promise to do 表示“承诺做某事”，固定搭配。"},
+{c:"非谓语动词",q:"It is no good ___ other's weakness.",o:["to laugh at","laughing at","to laugh","laughing"],a:1,x:"It is no good doing sth. 固定句型。"},
+{c:"非谓语动词",q:"Could you imagine ___ as a doctor?",o:["yourself work","you to work","yourself working","you to be working"],a:2,x:"imagine doing 表示“想象做某事”；imagine sb doing 结构。"},
+{c:"非谓语动词",q:"I went to Canada ___ English.",o:["for learning","to learn","learnning","and learn"],a:1,x:"不定式 to learn 表示目的：“去加拿大是为了学英语”。"},
+{c:"非谓语动词",q:"The chief denied ____ 1000 dollars before.",o:["to steal","stealing","stole","having stolen"],a:3,x:"deny doing 表示“否认做某事”；有 before 表示过去时间状语，用分词完成体 having stolen。"},
+{c:"非谓语动词",q:"The teachers don't permit ___ in examinations.",o:["cheated","to cheat","cheating","to cheating"],a:2,x:"permit doing 表示“允许做某事”；permit sb to do 表示“允许某人做某事”。"},
+{c:"非谓语动词",q:"I know the man ___ by John.",o:["described","describing","describe","to describe"],a:0,x:"the man 与 describe 是被动关系，用过去分词 described 做后置定语。"},
+{c:"非谓语动词",q:"I often think of the ___ scene.",o:["excited","excite","to excite","exciting"],a:3,x:"-ing 形容词修饰事物：exciting scene（激动人心的场面）。"},
+{c:"非谓语动词",q:"The woman would rather ____ than go by ship.",o:["traveled by train","traveling","to travel in train","travel by train"],a:3,x:"would rather do than do 是固定搭配。"},
+{c:"非谓语动词",q:"Alex insisted ____ money.",o:["asking for","on asking for","to ask for","on asking"],a:1,x:"insist on doing 表示“坚持要求做某事”；ask for sth 表示“要求得到某物”。"},
+{c:"非谓语动词",q:"She pretended ____ me when I passed by.",o:["not to see","not seeing","to not see","having not seen"],a:0,x:"pretend to do 表示“假装做某事”；否定式为 pretend not to do。"},
+/* ---- 介词与固定搭配 ---- */
+{c:"介词与固定搭配",q:"The fire had burnt the forest ___ when it was put out.",o:["over","alone","off","away"],a:3,x:"burn sth. away 表示“把某物烧毁”，固定搭配。"},
+{c:"介词与固定搭配",q:"You should think ___ these questions that you are doing.",o:["about","of","for","over"],a:3,x:"think about 表示“思考”；think of 表示“想到”；think over 表示“反复考虑”。"},
+{c:"介词与固定搭配",q:"—Where is Alex?\n—He is dancing ___ the music.",o:["to","for","with","on"],a:0,x:"dance to the music 表示“随着音乐起舞”，固定搭配。"},
+{c:"介词与固定搭配",q:"The girl ___ red is my sister.",o:["on","with","for","in"],a:3,x:"in + 颜色表示“穿着……颜色的衣服”。"},
+{c:"介词与固定搭配",q:"I spent two days walking ____ the forest.",o:["over","across","out","through"],a:3,x:"森林是“立体的”，用 through 表示“穿过”；across 表示“穿过平面”。"},
+{c:"介词与固定搭配",q:"I waited for a long time ____ the bus stop.",o:["in","on","over","at"],a:3,x:"at 一般用于小地点前，in 一般用于大地点前。"},
+{c:"介词与固定搭配",q:"My grandmother often goes ____ the street to buy apples.",o:["over","through","across","cross"],a:2,x:"街道是平面的，用 across 表示“穿过街道”；goes 后不能直接接动词 cross。"},
+{c:"介词与固定搭配",q:"The plane is flying ____ the bridge.",o:["on","in","over","with"],a:2,x:"fly over the bridge 表示“从桥上方飞过”，over 表示“在某物上方（不接触）”。"},
+{c:"介词与固定搭配",q:"I'll arrive ___ Shanghai in two days.",o:["at","in","on","to"],a:1,x:"arrive in 表示“到达（大地点）”，arrive at 表示“到达（小地点）”。"},
+{c:"介词与固定搭配",q:"—Who is knocking ___ the door?\n—It must be Ricky.",o:["at","on","over","with"],a:0,x:"knock at the door 表示“敲门”，固定搭配。"},
+{c:"介词与固定搭配",q:"I'll never give ___ my study.",o:["up","in","off","at"],a:0,x:"give up 表示“放弃”。"},
+{c:"介词与固定搭配",q:"We are proud ____ his courage.",o:["of","to","at","in"],a:0,x:"be proud of 表示“为……感到骄傲”。"},
+{c:"介词与固定搭配",q:"Please wait for a moment. I'll change ___ a beautiful suit.",o:["on","for","to","into"],a:3,x:"change into 表示“换成”，change into a beautiful suit 即“换上一套好看的西装”。"},
+{c:"介词与固定搭配",q:"John stayed ___ making experiments till midnight.",o:["away","on","up","with"],a:2,x:"stay up 表示“熬夜”。"},
+{c:"介词与固定搭配",q:"The suit fitted him well ____ the color was a little bright.",o:["except for","except that","except when","besides"],a:1,x:"except that 后接句子，表示“除了……（这一点）之外”。"},
+{c:"介词与固定搭配",q:"Put the sugar in the cupboard to prevent it from ___ ants.",o:["for","with","of","from"],a:3,x:"prevent sb/sth from sth/doing sth 表示“阻止某人/某物做某事”，固定搭配。"},
+{c:"介词与固定搭配",q:"Please turn ___ the radio. It's too noisy.",o:["up","down","off","on"],a:1,x:"收音机太吵，应“调小”，turn down。"},
+{c:"介词与固定搭配",q:"He threw the ball ____ the wall and it bounced back.",o:["on","to","against","at"],a:2,x:"against the wall 表示“（砸）对着墙”。"},
+{c:"介词与固定搭配",q:"—Did you fly to London directly?\n—No, I traveled from Taiwan ____ Paris.",o:["through","by way of","by the way","in the way"],a:1,x:"by way of 表示“经由”；by the way 表示“顺便说”；in the way 表示“挡路”。"},
+{c:"介词与固定搭配",q:"In summer, I often cool myself ___ the tree.",o:["below","beneath","under","in"],a:2,x:"在树下乘凉用 under the tree，表示垂直下方。"},
+{c:"介词与固定搭配",q:"I was surprised ____ how he made so much money.",o:["at","with","by","on"],a:0,x:"be surprised at 表示“因为某事而感到惊讶”，固定搭配。"},
+{c:"介词与固定搭配",q:"He was stopped by police when he was driving ____ full speed.",o:["in","for","with","at"],a:3,x:"at full speed 表示“全速”，固定搭配。"},
+/* ---- 连词 ---- */
+{c:"连词",q:"Hurry up, ___ you will miss the last bus.",o:["and","or","while","so"],a:1,x:"“祈使句 + or + 将来时”表示“否则就会……”。"},
+{c:"连词",q:"John is thin ____ his brother is very fat.",o:["and","or","while","so"],a:2,x:"while 表对比，表示“然而”。"},
+{c:"连词",q:"My bike is very old, ___, it was in wonderful condition.",o:["so","however","for","but"],a:1,x:"however 表示转折对比，一般前后用标点隔开（插入语用法）。"},
+{c:"连词",q:"It was raining, ___ the sports meeting was put off.",o:["and","while","so","but"],a:2,x:"前因后果，用 so 表示“因此”。"},
+{c:"连词",q:"He not only learns Chinese _____.",o:["but also learns English","but also English","or English","and English"],a:0,x:"not only...but also... 连接平行结构，前后成分要对称。"},
+/* ---- 情态动词与虚拟语气 ---- */
+{c:"情态动词与虚拟语气",q:"Hundreds of jobs ___ if the factory closes.",o:["lose","will be lost","are lost","will lose"],a:1,x:"if 引导的条件状语从句用一般现在时（主将从现），主句用一般将来时；jobs 是“被失去”，用被动。"},
+{c:"情态动词与虚拟语气",q:"Everything ___ if Albert hadn't called the fire department immediately after the fire broke out.",o:["would destroy","would have destroyed","would be destroyed","would have been destroyed"],a:3,x:"if 引导的虚拟条件句：从句用过去完成时（与过去事实相反），主句用 would have done；everything 与 destroy 是被动关系。"},
+{c:"情态动词与虚拟语气",q:"My daughter ___ a doctor three years ago.",o:["was married","married with","married to","got married to"],a:3,x:"marry 是及物动词，直接接人；被动结构为 be/get married to sb。"},
+{c:"情态动词与虚拟语气",q:"These dishes ___ easily.",o:["don't clean","are not cleaned","have not been","are not to be cleaned"],a:0,x:"clean 后加 easily 等副词时不用被动语态：these dishes don't clean easily（这些盘子不容易洗干净）。"},
+{c:"情态动词与虚拟语气",q:"Bruce spent as much as he ___ fishing.",o:["could","went","could to go","could going"],a:3,x:"as much as he could（尽他所能）+ spend time doing sth，故用 could going。"},
+{c:"情态动词与虚拟语气",q:"Although I've never seen your daughter, I guess this little girl ___ be your daughter.",o:["would","should","can","must"],a:3,x:"must 表示有把握的推测：“一定是”。"},
+{c:"情态动词与虚拟语气",q:"If you do as I tell you, you ____ be successful.",o:["shall","may","can","will"],a:3,x:"条件句“主将从现”：主句用一般将来时 will be successful。"},
+{c:"情态动词与虚拟语气",q:"—May I use your pen?\n—No, ____. ",o:["you can't","you mustn't","you may not","you needn't"],a:1,x:"may 引导的疑问句，其否定回答用 mustn't，不用 may not。"},
+{c:"情态动词与虚拟语气",q:"I ____ read books when I was four years old.",o:["can","could","may","might"],a:1,x:"can 的过去式是 could，表示过去的能力。"},
+{c:"情态动词与虚拟语气",q:"____ the man been sent to hospital, his life would have been saved.",o:["Has","Will have","Had","Have"],a:2,x:"虚拟条件句从句用过去完成时（had been sent），省略 if 后 had 提前引起倒装：Had the man been sent..."},
+{c:"情态动词与虚拟语气",q:"She looks as if she ____ for several months.",o:["hasn't eaten","haven't eaten","hadn't eaten","didn't eat"],a:2,x:"look as if 引导虚拟语气；for several months 表示与过去事实相反，从句用过去完成时。"},
+/* ---- 词组搭配 ---- */
+{c:"词组搭配",q:"If you don't know the word, why don't you ____ in the dictionary?",o:["look at it","look after it","look up it","look it up"],a:3,x:"look up（查阅）+ 代词作宾语时代词必须放中间：look it up。"},
+{c:"词组搭配",q:"The horrible noise from the man's room simply ___ me mad.",o:["put","caused","drove","turned"],a:2,x:"drive sb. mad 表示“把某人逼疯”，固定搭配。"},
+{c:"词组搭配",q:"I can hardly hear the radio. Would you please ____?",o:["turn it on","turn it down","turn it up","turn it off"],a:2,x:"几乎听不见，应该“调大声”，turn it up（代词放中间）。"},
+{c:"词组搭配",q:"—Do you think this hall can ____ 1000 people?\n—I don't think so.",o:["sit","manage","take","hold"],a:3,x:"hold 表示“容纳”；manage to do 表示“成功地做到”。"},
+{c:"词组搭配",q:"I went to the forest to ____ the tiger there.",o:["recognize","search","study","learn"],a:2,x:"study the tiger 表示“研究老虎”。"},
+{c:"词组搭配",q:"The wooden house was ____ by the flood.",o:["washed out","washed off","washed up","washed away"],a:3,x:"wash away 表示“冲走”，房子“被洪水冲走”。"},
+{c:"词组搭配",q:"The clothes ___ me one thousand yuan.",o:["taken","took","used","spent"],a:1,x:"sth. takes sb. money 表示“某物花费某人钱”，用过去式 took。"},
+{c:"词组搭配",q:"You must ____ the importance of studying foreign languages.",o:["learn by heart","know by heart","keep in mind","think of"],a:2,x:"keep in mind 表示“记住”；learn/know by heart 一般用于背记文字内容。"},
+{c:"词组搭配",q:"When I invited him to have a dinner, he told me he was very busy and had not a minute to ____.",o:["spend","save","share","spare"],a:3,x:"spare 表示“空出（时间、空间）”；had not a minute to spare 表示“一分钟空闲都没有”。"},
+{c:"词组搭配",q:"Please help me ____ my book that is on the ground.",o:["keep up","lay up","look up","pick up"],a:3,x:"pick up 表示“捡起”。"},
+{c:"词组搭配",q:"My father ___ me to become a teacher.",o:["thinks","says","hopes","wishes"],a:3,x:"hope 后不能直接接名词/复合宾语；wish sb to do 表示“希望某人做某事”。"},
+{c:"词组搭配",q:"All life on the earth ___ on the sun.",o:["depends","carries","keeps","goes"],a:0,x:"depend on 表示“依赖、依靠”。"},
+{c:"词组搭配",q:"The guests are coming. I must ___ the dinner.",o:["get down to do prepare","get down to preparing","get used to prepare","look forward to preparing"],a:1,x:"get down to doing 表示“开始认真做某事”（to 是介词）。"},
+{c:"词组搭配",q:"She ____ my pen, then she ____ it to Jack.",o:["borrowed; lent","borrowed; had lent","lent; had borrowed","lend; borrow"],a:0,x:"borrow（借入）与 lend（借出）都是瞬间动作，按时间顺序用一般过去式。"},
+{c:"词组搭配",q:"You'd better ____ what is right before making a decision.",o:["look for","search for","find out","find"],a:2,x:"find out 表示通过思考、询问等“查明”情况、事实，后接 what is right。"},
+{c:"词组搭配",q:"The farmers ___ rice in the field.",o:["get along with","cut down","cut up","get in"],a:3,x:"get in 表示“收割（庄稼）”。"},
+{c:"词组搭配",q:"Father won't ___ us to use his recorder.",o:["have","let","agree","allow"],a:3,x:"allow sb to do 表示“允许某人做某事”；have/let sb do 不带 to；agree 不接复合宾语。"},
+{c:"词组搭配",q:"I hope your speech can ___ some new points.",o:["bring in","make up","take in","give in"],a:0,x:"bring in 表示“提出、引入（新观点）”。"},
+{c:"词组搭配",q:"He ___ to make it, but he failed again.",o:["was trying","tried","was managing","managed"],a:1,x:"tried to make it 表示“努力尝试过但没成功”（manage to do 表示“成功做到”，与 failed 矛盾）。"},
+{c:"词组搭配",q:"Whenever I saw the pretty girl, my heart would ___ fast.",o:["run","beat","strike","hit"],a:1,x:"beat 表示（心脏）跳动，强调连续反复；strike/hit 表示“敲打、撞击”。"},
+{c:"词组搭配",q:"Many things are ____ iron.",o:["made up","made from","made of","made into"],a:2,x:"be made of 表示看得出原料的“由……组成”（物理变化）；be made from 表示看不出原料（化学变化）。"},
+{c:"词组搭配",q:"David said he couldn't ___ one day away from studying.",o:["waste","spend","cost","afford"],a:3,x:"couldn't afford 表示“承受不起、承担不了……的损失”。"},
+{c:"词组搭配",q:"Fire-fighters spent two hours ___ the fire.",o:["putting on","putting up","putting off","putting out"],a:3,x:"put out the fire 表示“灭火”；spend time doing sth。"},
+{c:"词组搭配",q:"Who can ___ the differences between these two leaves?",o:["talk","tell","speak","say"],a:1,x:"tell the differences 表示“指出/辨别两者的不同”。"},
+{c:"词组搭配",q:"Since you have made up your mind, you would ____ to carry out your plan.",o:["set about","set off","set up","set out"],a:3,x:"set out to do 表示“开始着手做某事”。"},
+{c:"词组搭配",q:"My mother is ____ the big meal.",o:["preparing to","preparing with","preparing","preparing about"],a:2,x:"prepare 是及物动词，直接接宾语：prepare the big meal。"},
+{c:"词组搭配",q:"How many pages have you ___ so far?",o:["looked","seen","covered","turned"],a:2,x:"cover 与 pages 连用表示“看了多少页”。"},
+{c:"词组搭配",q:"When you meet new words, you should ____ in the dictionary.",o:["look through them","look them up","look up them","look down them"],a:1,x:"look up（查阅）+ 代词作宾语时代词必须放中间：look them up。"},
+{c:"词组搭配",q:"Reading books will ___ my taste for literature.",o:["add","add up","add to","add up to"],a:2,x:"add to 表示“增加、增添”；add up to 表示“总计达”。"},
+{c:"词组搭配",q:"World War One ___ in 1914.",o:["broke out","broke up","broke in","broke"],a:0,x:"break out 表示（战争等）“爆发”。"},
+{c:"词组搭配",q:"The book ___ me.",o:["is belong to","is belonged to","belongs to","belong to"],a:2,x:"belong to 是动词短语，不能用被动，主语单数用 belongs to。"},
+{c:"词组搭配",q:"That red suit ___ me.",o:["doesn't fit","isn't fit","fits for","doesn't fit for"],a:0,x:"fit 是及物动词，直接接人：doesn't fit me。"},
+{c:"词组搭配",q:"Jack is ___ a black jacket today.",o:["having","put on","wearing","dressed"],a:2,x:"wear + 服装表示“穿着”（状态）；be dressed in 才是正确搭配，put on 是瞬间动作。"},
+{c:"词组搭配",q:"My mother always tells me to ___ my own things.",o:["put away","put aside","put on","put up"],a:0,x:"put away 表示“把……收好”。"},
+{c:"词组搭配",q:"Cheap coal ____ a lot of smoke.",o:["gives up","gives in","gives away","gives off"],a:3,x:"give off 表示“散发出（烟、气味等）”。"},
+{c:"词组搭配",q:"All children should be ____ to have manners.",o:["brought out","brought through","brought up","brought about"],a:2,x:"be brought up 表示“被抚养长大、被教导”。"},
+{c:"词组搭配",q:"I ____ the president to pay attention to pollution.",o:["suggest","hope","make","beg"],a:3,x:"beg sb to do sth 表示“请求某人做某事”；suggest/hope 不接复合宾语。"},
+{c:"词组搭配",q:"—You should have stopped smoking.\n—Yes, but it is very difficult to ____.",o:["get off","do away","get on","get rid of"],a:3,x:"get rid of 表示“摆脱、戒掉”，get rid of smoking 即“戒烟”。"},
+{c:"词组搭配",q:"Mr. White's daughter ____ Henry for two years.",o:["married","was married","has been married with","has been married to"],a:3,x:"be married to sb 表示“与某人结婚”（持续状态），与 for two years 连用；marry 不与 with 搭配。"},
+{c:"词组搭配",q:"I _____ an invitation, but I didn't ____ it.",o:["have received; accept","had received; accept","have accepted; receive","had accepted; receive"],a:1,x:"receive 表示“收到”，accept 表示“接受”；“收到但没接受”发生在过去之前，用过去完成时。"},
+{c:"词组搭配",q:"I found my son ____ on the table when I returned home.",o:["laying","lying","lain","lied"],a:1,x:"lie（躺）的现在分词是 lying；laying 是 lay（放置/产卵）的现在分词。"},
+{c:"词组搭配",q:"Jenny _____ in the crowded street in order to find her friend.",o:["looked for","looked through","looked around","looked forward to"],a:2,x:"look around 表示“环顾四周”；look through 表示“仔细检查、看穿”。"},
+{c:"词组搭配",q:"The accident occurred when the plane was just ____.",o:["taking away","taking out","taking off","taking up"],a:2,x:"take off 表示（飞机）“起飞”。"},
+{c:"词组搭配",q:"The suit ___ me 100 dollars.",o:["spent","cost","paid","took"],a:1,x:"cost 表示“花费”，主语是物；spend 主语是人；pay 主语是人。"},
+{c:"词组搭配",q:"The other day I ___ a bird but missed it.",o:["shoot at","shot at","shoot","shot"],a:1,x:"shoot at 表示“朝……瞄准射击”（未必射中）；the other day 用过去时 shot at。"},
+{c:"词组搭配",q:"I am ___ Beijing tomorrow morning.",o:["arriving at","arriving in","getting","reaching at"],a:1,x:"arrive in 后接大地点；reach 是及物动词直接加地点，不接 at。"},
+{c:"词组搭配",q:"How much did you ___ the radio?",o:["pay for","pay off","pay back","pay out"],a:0,x:"pay for sth 表示“为某物付钱”。"},
+{c:"词组搭配",q:"Our water supply has been ___ for two days.",o:["cut out","cut off","cut down","cut away"],a:1,x:"cut off 表示“切断（供应）”。"},
+{c:"词组搭配",q:"The bag is so heavy. Let me help you ___ it.",o:["bring","carry","take","fetch"],a:1,x:"carry 表示“提、扛（重物）”。"},
+{c:"词组搭配",q:"—Will somebody go and get Dr. White?\n—He's already been ____.",o:["asked for","sent for","called for","looked for"],a:1,x:"send for a doctor 表示“派人去请医生”。"},
+{c:"词组搭配",q:"The old man can't hope to ____ his cancer in a few days.",o:["get away","get off","get out","get over"],a:3,x:"get over 表示“克服、战胜（疾病等困难）”。"},
+/* ---- 时态复习 ---- */
+{c:"时态复习",q:"By the end of this year, I ____ English in that middle school for three years.",o:["have taught","will be teaching","will have taught","are teaching"],a:2,x:"by the end of this year 表示将来，与 by 连用用将来完成时 will have taught。"},
+{c:"时态复习",q:"—What happened to Tony?\n—He stepped on a nail while he ___ in the yard.",o:["was running","is running","runs","had run"],a:0,x:"“一般过去时 + while + 过去进行时”表示“……的时候正在……”。"},
+{c:"时态复习",q:"We promise that we'll meet again after we ___ our college education in three years.",o:["finish","will finish","have gone","goes"],a:0,x:"时间状语从句遵循“主将从现”：after 从句用一般现在时。"},
+{c:"时态复习",q:"She often ___ to see her grandparents.",o:["is going","went","has gone","goes"],a:3,x:"often 是习惯性动作标志词，用一般现在时。"},
+{c:"时态复习",q:"It is the first time I ___ the Great Wall.",o:["will visit","had visited","have visited","visit"],a:2,x:"It is the first (second...) time + 从句，从句用现在完成时。"},
+{c:"时态复习",q:"It was the first time I ____ the Great Wall.",o:["will visit","had visited","have visited","visit"],a:1,x:"It was the first time + 从句，从句用过去完成时。"},
+{c:"时态复习",q:"If it ___ rain tomorrow, we will have a picnic.",o:["won't","doesn't","will","wouldn't"],a:1,x:"条件状语从句“主将从现”：从句用一般现在时否定 doesn't。"},
+{c:"时态复习",q:"John's brother _____ in bed all day because he had a headache.",o:["lay","lie","laid","lain"],a:0,x:"lie（躺）的过去式是 lay，过去分词是 lain；had a headache 是过去时，对应用 lay。"},
+{c:"时态复习",q:"—What were you doing this time last night?\n—I _____ newspaper.",o:["am reading","was reading","read","would read"],a:1,x:"问句是过去进行时，答句也用过去进行时 was reading。"},
+{c:"时态复习",q:"I ____ my homework when the telephone ____.",o:["did; rang","was doing; was ringing","was doing; rang","did; was ringing"],a:2,x:"“当电话响时我正在做作业”：延续动作用过去进行时，短暂动作用一般过去时。"},
+{c:"时态复习",q:"Do you see the sign that ____ \"keep off the grass\"?",o:["is read","reads","is written","writes"],a:1,x:"reads 在此表示“（牌子上）写着”，用主动形式。"},
+{c:"时态复习",q:"Can you tell me when you ____?",o:["come back","will come back","is coming back","would come back"],a:1,x:"when 引导宾语从句表示“你将什么时候回来”，用一般将来时。"},
+{c:"时态复习",q:"When spring ____, the weather will be warmer and warmer.",o:["is coming","comes","come","will come"],a:1,x:"时间状语从句“主将从现”：从句用一般现在时 comes。"},
+{c:"时态复习",q:"—Do you know him?\n—Yes, I ____ him once before.",o:["met","meet","have met","had met"],a:2,x:"现在完成时表示过去动作对现在造成的影响（所以现在“认识他”）。"},
+{c:"时态复习",q:"Look out! The car ____.",o:["comes","is coming","will come","is to come"],a:1,x:"look out 提示车正“开过来”，用现在进行时表即将发生。"},
+{c:"时态复习",q:"You must water these flowers. Look, they ____ soon.",o:["will die","would die","are dying","are being died"],a:2,x:"die 等动词用进行时表示即将发生：“快死了”。"},
+{c:"时态复习",q:"Hello! I ____ you ____ in London. How long have you been here?",o:["don't know; were","hadn't known; are","haven't known; are","didn't know; were"],a:3,x:"一般过去时强调动作发生在过去：“（刚才）不知道你在伦敦”。"},
+{c:"时态复习",q:"Don't get off the bus until it ____.",o:["has stopped","stopped","will stop","shall stop"],a:0,x:"until 引导的时间状语从句，主句祈使/将来时，从句用现在完成时 has stopped（强调“完全停稳”）。"},
+{c:"时态复习",q:"That supper was the most delicious dinner I ____.",o:["would have","have ever had","had never had","had ever had"],a:3,x:"主句是过去时（was），表示“在那之前的过去”用过去完成时 had ever had。"},
+{c:"时态复习",q:"Let's set off before the sun ____.",o:["will set","is setting","sets","set"],a:2,x:"时间状语从句用一般现在时：before the sun sets。"},
+{c:"时态复习",q:"—What will you do this weekend?\n—I don't know, but it's about time ____ it.",o:["I'm considering","I'll consider","I had considered","I considered"],a:3,x:"It's (about/high) time + 一般过去时，表示“到该做……的时候了”（虚拟）。"},
+{c:"时态复习",q:"—Dick sat in the back of the classroom.\n—Really? I thought he ____ in the front.",o:["sat","is sitting","has been sitting","had sat"],a:3,x:"“我以为他坐在前面”发生在过去的过去（thought 之前），用过去完成时 had sat。"},
+{c:"时态复习",q:"—Hi, Tracy, you look tired.\n—I'm tired, because I ___ the living room all day.",o:["painted","had painted","have been painting","have painted"],a:2,x:"现在完成进行时表示动作从过去持续到现在并可能继续：“我一整天都在刷客厅”。"},
+{c:"时态复习",q:"He insists that he ___ it by himself.",o:["manages","will manage","manage","managed"],a:2,x:"insist 表示“坚决要求”时接虚拟语气：insist that sb (should) do sth，动词用原形。"},
+{c:"时态复习",q:"You ____ upset. What's wrong with you?",o:["are looking","have looked","look","looked"],a:2,x:"look（看起来）是系动词，不用进行时，用一般现在时 look upset。"},
+{c:"时态复习",q:"I don't know if she ___. If she ___, I'll let you know.",o:["will come; comes","comes; will come","comes; comes","will come; will come"],a:0,x:"第一个 if 表示“是否”引导宾语从句，用将来时；第二个 if 引导条件状语从句，用一般现在时（主将从现）。"},
+{c:"时态复习",q:"My birthday ____ next week and I ____ twenty-three years old.",o:["comes; is to be","is coming; will be","comes; shall be","is coming; is going to be"],a:1,x:"come 的进行时可代替将来时（is coming）；表年龄的客观将来用 will be。"},
+{c:"时态复习",q:"Who do you think __ him advice?",o:["give","gives","giving","to give"],a:1,x:"do you think 是插入语，本句是一般现在时，who 做主语用第三人称单数 gives。"},
+{c:"时态复习",q:"—Which big city have you visited?\n—I ___ Paris.",o:["have gone to","have been to","went to","go to"],a:1,x:"have been to 表示“去过（已回来）”；have gone to 表示“去了（还没回来）”。"},
+{c:"时态复习",q:"—Did you see Mary in the reading room?\n—No, ____ by the time I came in.",o:["she'd left","she's left","she left","she would leave"],a:0,x:"by the time + 一般过去时从句，主句用过去完成时 she had left。"},
+{c:"时态复习",q:"To our surprise, we found that she ___ her English so rapidly.",o:["improves","improved","has improved","had improved"],a:3,x:"improve 发生在 found（过去）之前，即“过去的过去”，用过去完成时。"},
+{c:"时态复习",q:"Did you ask Nancy if she ___ tomorrow?",o:["left","had left","is going to leave","was going to leave"],a:3,x:"主句是过去时，宾语从句表“打算”用 was going to leave（过去将来）。"},
+{c:"时态复习",q:"David ____ to pass the examination but he failed.",o:["has hoped","hopes","would hope","had hoped"],a:3,x:"hope 发生在 failed 之前（过去的过去），用过去完成时 had hoped。"},
+{c:"时态复习",q:"She told me that she ___ there in two hours.",o:["will be","would be","was","has been"],a:1,x:"主句过去时，从句表过去将来，用 would be。"},
+{c:"时态复习",q:"There ___ great changes in our hometown in the past twenty years.",o:["had been","will be","have been","were"],a:2,x:"in the past twenty years 是现在完成时标志：there have been great changes。"},
+{c:"时态复习",q:"I'll begin the dictation when you ___ ready.",o:["shall be","will be","are","have been"],a:2,x:"时间状语从句“主将从现”：when you are ready。"},
+{c:"时态复习",q:"It ____ when we arrived at the station.",o:["has snowed","is snowing","snowed","was snowing"],a:3,x:"“我们到达时雪正在下”，用过去进行时 was snowing。"},
+{c:"时态复习",q:"—When will you finish your work?\n—I'll finish it before you ___ back.",o:["come","will come","shall come","have come"],a:0,x:"时间状语从句“主将从现”：before you come back。"},
+{c:"时态复习",q:"—Why do you hurt her?\n—But I ____. ",o:["mean to","didn't mean to","meant to","would mean to"],a:1,x:"mean to do 表示“有意做……”；“我不是故意的”用 didn't mean to。"},
+{c:"时态复习",q:"—Please help me post this letter.\n—OK. _____.",o:["I do","I would","I will","I did"],a:2,x:"表示答应将去做，用 I will。"},
+/* ---- 综合语法 ---- */
+{c:"综合语法",q:"I have decided to do it and anything ___ you say will not change it.",o:["that","whose","which","about which"],a:0,x:"先行词 anything 是不定代词，定语从句只能用 that 引导。"},
+{c:"综合语法",q:"_____ is known to all, war is serious.",o:["That","It","As","Since"],a:2,x:"As is known to all 表示“众所周知”，as 引导非限制性定语从句。"},
+{c:"综合语法",q:"Could you tell me the reason ___ you were upset?",o:["which","for what","for why","why"],a:3,x:"the reason why... 表示“……的原因”。"},
+{c:"综合语法",q:"Would you like ___ tea?",o:["any","much","little","some"],a:3,x:"some 用于疑问句表示客气地请求、邀请（希望得到肯定回答）。"},
+{c:"综合语法",q:"China is famous for ____ history.",o:["his","him","its","it is"],a:2,x:"国家作整体时用 its 指代。"},
+{c:"综合语法",q:"Everyone has gone, ____?",o:["hasn't he","don't they","haven't they","doesn't he"],a:0,x:"everyone 作反意疑问时习惯用 he/they 指代，且 has gone 是完成时：hasn't he？"},
+{c:"综合语法",q:"All the homework, ___ my teacher gave to me, should be finished tonight.",o:["that","which","what","they"],a:1,x:"两逗号之间是非限制性定语从句，用 which。"},
+{c:"综合语法",q:"The population of China is larger than ___ of America.",o:["that","those","the","it"],a:0,x:"that 是指示代词，指代前面提到的 population（单数）：that of America。"},
+{c:"综合语法",q:"There is a wide road in front of my house, but ____ of the sides has trees.",o:["both","every","neither","none"],a:2,x:"路有两边，“两边都没有树”用 neither of the sides（谓语用单数）。"},
+{c:"综合语法",q:"John said he'd been working in the office for an hour, ___ was true.",o:["he","this","which","who"],a:2,x:"which 在非限制性定语从句中做主语，指代前面整个句子。"},
+{c:"综合语法",q:"____ of the houses were destroyed during World War Two.",o:["Both","Most","Any","All"],a:1,x:"most of the houses（大多数房子）+ 复数谓语 were destroyed，符合语法和语境。"},
+{c:"综合语法",q:"____ are there ____ true.",o:["That they; is","They; is","That they; are","They; are"],a:0,x:"整句是由 that 引导的主语从句；名词性从句做主语时谓语动词用单数 is。"},
+{c:"综合语法",q:"John has a pen ____ mine.",o:["the same as","the same like","same like","the same"],a:0,x:"the same as... 表示“与……一样”，固定搭配。"},
+{c:"综合语法",q:"One day ___ fire broke out in the forest near my house and the fire fighters tried to put out ___ fire.",o:["the; a","a; a","a; the","the; the"],a:2,x:"首次提到用 a fire（发生一场火灾）；再次特指用 the fire（扑灭那场火）。"},
+{c:"综合语法",q:"Professor Wang is still in ____ habit of smoking in ____ places.",o:["the; the","the; /","a; the","/; the"],a:1,x:"in the habit of 表示“有……的习惯”（固定加 the）；places 泛指“公共场所”不加冠词。"},
+{c:"综合语法",q:"—What is ____ with you?\n—I've got ____ in my right arm.",o:["a matter; pains","the matter; the pain","the wrong; a pain","the matter; a pain"],a:3,x:"What is the matter with sb 是固定搭配；pain 表“某处疼痛”用 have a pain in + 身体部位。"},
+{c:"综合语法",q:"Pay attention to ___ main idea when reading ___ English novel.",o:["a; the","the; an","the; the","a; an"],a:1,x:"pay attention to the main idea（特指中心思想）；一本英文小说用 an English novel。"},
+{c:"综合语法",q:"____ Mid-Autumn Day is ____ traditional festival in China.",o:["The; a","A; a","A; the","/; a"],a:0,x:"传统节日名称前加定冠词 the Mid-Autumn Day；“一个传统节日”泛指用 a。"},
+/* ---- 名词的用法 ---- */
+{c:"名词的用法",q:"The student is so clever; he has ____.",o:["brain","a brain","brains","the brain"],a:2,x:"brain 用作“头脑、智慧”时常用复数：he has brains。"},
+{c:"名词的用法",q:"Could you give me ___ on how to learn math well?",o:["many advice","many advices","a lot of advices","a piece of advice"],a:3,x:"advice 是不可数名词，“一条建议”用 a piece of advice。"},
+{c:"名词的用法",q:"—Let's go to the cinema.\n—I'm sorry. I have ___ tonight.",o:["many homeworks","much homeworks","many homework","much homework"],a:3,x:"homework 是不可数名词，用 much 修饰，且无复数形式。"},
+{c:"名词的用法",q:"—Why are you so late?\n—I was delayed by ______.",o:["any heavy traffic","heavy traffic","some heavy traffic","a heavy traffic"],a:1,x:"traffic 做“交通”讲是不可数名词，不用冠词：heavy traffic（交通拥堵）。"},
+{c:"名词的用法",q:"Mr. White is _______.",o:["a old friend of my father","an old friend of my father","an old friend of my father's","my father old friend"],a:2,x:"of + 's 双重属格：an old friend of my father's 表示“我父亲众多老朋友中的一个”。"},
+{c:"名词的用法",q:"Henry went into the ___ to buy a pair of shoes.",o:["shoes store","shore store","shoe's store","shoes' store"],a:0,x:"名词做定语时用单数形式：shoe store（鞋店）。"},
+{c:"名词的用法",q:"He is the only one among the ___ teachers who ___ from Beijing.",o:["man; comes","man's; come","men; come","men; comes"],a:3,x:"man 做定语修饰复数名词时要变复数：men teachers；但 the only one 是单数，从句谓语用 comes。"},
+{c:"名词的用法",q:"—Please don't be late again next time.\n—I didn't intend to but it is ___ from my home to the station.",o:["two hours' walk","two hour walk","two hours walk","two hour's walk"],a:0,x:"以 s 结尾的复数名词所有格只加撇号：two hours' walk（两小时的路程）。"},
+{c:"名词的用法",q:"You have to climb up the ___ tree to fetch the kite.",o:["thirty foots high","thirty-feet-high","thirty-foot-high","thirty feet high"],a:2,x:"“数词 + 名词单数 + 形容词”构成合成形容词做定语：thirty-foot-high tree。"},
+{c:"名词的用法",q:"Mr. Green entered a shop that only sells ____.",o:["men shoes","man's shoes","men's shoes","the shoes of men"],a:2,x:"man 修饰复数名词时自身变复数，且所有格用 men's：men's shoes。"},
+{c:"名词的用法",q:"____ happy life people in the small village today!",o:["What","How","How a","What a"],a:3,x:"what 开头的感叹句 + 名词中心词，life 可数要加冠词：What a happy life...!"},
+{c:"名词的用法",q:"Farmers raise ___ on their farms.",o:["geese","gooses","geeses","goose"],a:0,x:"goose（鹅）的复数是不规则变化 geese。"},
+{c:"名词的用法",q:"This new car is ____.",o:["Ricky and Bruce","Ricky's and Bruce","Ricky and Bruce's","Ricky's and Bruce's"],a:2,x:"两人共同拥有时，只在最后一个人名后加 's：Ricky and Bruce's。"},
+{c:"名词的用法",q:"There are a large number of _____ in the street.",o:["passer-by","passer-bies","passer-bys","passers-by"],a:3,x:"复合名词变复数时主体部分变化：passer-by → passers-by。"},
+{c:"名词的用法",q:"My favorite food is some ___ and ___.",o:["potatos; bread","potatoes; bread","potatos; breads","potatoes; breads"],a:1,x:"potato 复数为 potatoes；bread 是不可数名词，没有复数。"},
+{c:"名词的用法",q:"—You are ____, aren't you?\n—No, we are ____.",o:["Frenchman; Germen","Frenchmen; Germans","Frenchmen; Germen","Frenchmans; German"],a:1,x:"Frenchman 复数为 Frenchmen；German 复数为 Germans（直接加 s）。"},
+{c:"名词的用法",q:"There are lots of ___ eating ___ at the foot of the hill.",o:["sheep; grass","sheeps; grass","sheep; grasses","sheeps; grasses"],a:0,x:"sheep 单复数同形；grass 是不可数名词。"},
+{c:"名词的用法",q:"That bookstore sells ____.",o:["children book","children books","children's books","childs books"],a:2,x:"children（复数不规则）的所有格加 's：children's books（儿童图书）。"},
+{c:"名词的用法",q:"It's bad ___ to speak with your mouth full of food.",o:["manners","manner","methods","way"],a:0,x:"manner 做“礼貌、礼仪”讲常用复数：It is bad manners to do..."},
+{c:"名词的用法",q:"I give my ___ to her on her birthday.",o:["the congratulation","congratulations","a congratulation","congratulation"],a:1,x:"congratulations 表示“祝贺”常用复数形式。"},
+{c:"名词的用法",q:"She is the one of ___ doctors who ___ from America.",o:["woman; comes","women; comes","women; come","woman; come"],a:1,x:"woman 做定语修饰复数名词时也变复数：women doctors；但先行词 the one 是单数，从句用 comes。"},
+{c:"名词的用法",q:"I'm surprised that a work ant has two ___.",o:["stomach","stomaches","stomacs","stomachs"],a:3,x:"stomach 以 ch 结尾但发音为 /k/，复数直接加 s：stomachs。"},
+{c:"名词的用法",q:"He is the best ___ teacher.",o:["chemistry","chemistry's","chemical","chemical's"],a:0,x:"学科名词直接做定语：chemistry teacher（化学老师）。"},
+{c:"名词的用法",q:"A thief is a harm to ___.",o:["the society","society","societies","a society"],a:1,x:"society 表抽象的“社会”时前面不加冠词。"},
+{c:"名词的用法",q:"What do you think about ___ advice?",o:["any one's else","anyone else's","any's one else","anyone else"],a:1,x:"else 修饰代词时所有格加在 else 后：anyone else's。"},
+{c:"名词的用法",q:"He went on doing his homework after ___.",o:["a moment rest","moments rest","a moments' rest","a moment's rest"],a:3,x:"单数名词所有格加 's：a moment's rest（片刻休息）。"},
+{c:"名词的用法",q:"Cattle ___ eating in the field at that time.",o:["are","is","was","were"],a:3,x:"cattle 是集合名词，本身表示复数意义，谓语用复数；at that time 用过去进行时 were eating。"},
+{c:"名词的用法",q:"The villager is about ___ ride from here.",o:["one and a half hour's","one-half-hour","one and half hour","one and a half hours'"],a:3,x:"超过一小时 hour 加 s，复数所有格只加撇号：one and a half hours' ride。"},
+{c:"名词的用法",q:"Tom's ___ as white as pearl.",o:["tooths are","teeth is","tooth is","teeth are"],a:3,x:"tooth 复数为 teeth；两颗以上的牙齿做主语谓语用 are。"},
+{c:"名词的用法",q:"There is ____ on my back.",o:["pain","a pain","of pain","pains"],a:1,x:"pain 表“（某处的）疼痛感”是可数名词：There is a pain..."},
+{c:"名词的用法",q:"Paper was first invented in _____.",o:["east","East","the East","the east"],a:2,x:"the East 特指“东方国家、亚洲国家”，方位名词大写并加 the。"},
+{c:"名词的用法",q:"Lucy does ___ homework than any other ___ in the class.",o:["much; student","most; student","more; student","more; students"],a:2,x:"比较级 more；any other 后接单数名词：any other student。"},
+{c:"名词的用法",q:"___ an important subject in university.",o:["Politics are","The politics are","Political is","Politics is"],a:3,x:"politics 表“政治学”一门学科时是单数名词，谓语用 is。"},
+{c:"名词的用法",q:"He has two ___ bills in his pocket.",o:["ten-pounds","ten-pound","ten pound","ten pounds"],a:1,x:"“数词 + 连字符 + 名词”构成复合形容词时名词用单数：ten-pound bills。"},
+{c:"名词的用法",q:"He spent ___ money on novels.",o:["a great deal of","a plenty of","many","a number of"],a:0,x:"a great deal of 修饰不可数名词；many 和 a number of 修饰可数名词；a plenty of 不存在。"},
+{c:"名词的用法",q:"This piece of ___ is enough for him to make a suit.",o:["cloth","cloths","clothing","clothes"],a:0,x:"cloth 表“布料”不可数；a piece of cloth（一块布料）。"},
+/* ---- 数词 ---- */
+{c:"数词",q:"—How soon can I take a bus downtown?\n—There is a bus passing here ______.",o:["every five minute","five minutes","every fifth minute","every five minutes"],a:3,x:"every five minutes 表示“每隔五分钟”。"},
+{c:"数词",q:"David is ten years old and his cousin is just ____. ",o:["twice as older as he","as twice old as he","twice his age","twice elder than he"],a:2,x:"表示“两倍年龄”用 twice as old as 或 twice his age。"},
+{c:"数词",q:"The ___ died three weeks ago.",o:["two-head-baby","two-heads-baby","two-head baby","two-head babys"],a:2,x:"“数词-名词单数-名词”合成词做定语：two-head baby（双头婴儿），合成词各部分用单数。"},
+{c:"数词",q:"Uncle Wang bought ___ eggs yesterday.",o:["two dozens","two dozen","two dozens of","dozens"],a:1,x:"数词 + dozen/hundred/thousand 用单数：two dozen eggs（两打鸡蛋）。"},
+{c:"数词",q:"Please turn to ___.",o:["page ten","page of turn","page tenth","tenth page"],a:0,x:"page + 基数词 = the + 序数词 + page：page ten = the tenth page。"},
+{c:"数词",q:"She taught in this school in ____. ",o:["1980's","1980s'","the 1980's","the 1980s'"],a:2,x:"in the 1980's 表示“20世纪80年代”，前面要加 the。"},
+{c:"数词",q:"About ___ of people disagreed with what the president said.",o:["three seventh","three of seven","three sevenths","three seven"],a:2,x:"分数表达：分子大于 1 时分母序数词用复数：three sevenths（3/7）。"},
+{c:"数词",q:"____ geese died of disease.",o:["Scores","Scores of","The scores of","Score of"],a:1,x:"scores of 表示不确切的数量“大量的”。"},
+{c:"数词",q:"____ dollars is a large sum.",o:["Eight thousands hundred","Eight hundred","Eight hundreds of thousand","Eight hundred of thousand"],a:1,x:"hundred 与基数词连用不加 s：eight hundred dollars。"},
+{c:"数词",q:"____, please allow me to introduce Professor Fan.",o:["Of all first","First all of","All of first","First of all"],a:3,x:"first of all 表示“首先”，固定短语。"},
+{c:"数词",q:"Ten years ____ a long time.",o:["is","are","to be","being"],a:0,x:"ten years 表示一个时间段，做主语时谓语动词用单数 is。"},
+{c:"数词",q:"Your books ____ as many as mine.",o:["are five times","is five time","is fifth time","are fifth time"],a:0,x:"“倍数 + as many as”表示“A 是 B 的几倍”；books 复数用 are。"},
+{c:"数词",q:"The output of steel in May makes up ___ the total.",o:["10%","10% of","10% in","10% for"],a:1,x:"10% of the total 表示“总额的百分之十”，of 不能省。"},
+{c:"数词",q:"It took me ____ to finish my homework.",o:["one and half hours","a half and an hour","an hour and half","one and a half hours"],a:3,x:"超过一小时 hour 加 s：one and a half hours（一个半小时）。"},
+{c:"数词",q:"—Do you have money?\n—I have a ___ note.",o:["hundred dollar","hundred-dollars","hundred-dollar","hundreds-dollar"],a:2,x:"“数词-名词”合成形容词中名词用单数：a hundred-dollar note。"},
+/* ---- 形容词和副词 ---- */
+{c:"形容词和副词",q:"Their beautiful smiles showed that they were having a ___ picnic.",o:["serious","friendly","lively","wonderful"],a:3,x:"picnic 是名词，前面用形容词修饰：wonderful picnic（美妙的野餐）。"},
+{c:"形容词和副词",q:"I find that records are often ____ an actual performance.",o:["as good","as good as","good as","as well as"],a:1,x:"as...as 表示“和……一样好”，修饰名词用形容词 good。"},
+{c:"形容词和副词",q:"It was ___ small a car that five people seemed crowded.",o:["so a small car that","such a small car that","so small a car that","a such small car that"],a:2,x:"so 为副词后接“形容词”，语序为 so small a car that；such 后接 a small car that。"},
+{c:"形容词和副词",q:"—Let's go for a walk.\n—I'm sorry. I'm too busy now. Please phone me ___ time.",o:["some other","some others","any other","the other"],a:0,x:"some other time 表示“改天吧、下次吧”。"},
+{c:"形容词和副词",q:"Please tell me ____ about this trip.",o:["something interested","interested something","interesting something","something interesting"],a:3,x:"something 是不定代词，形容词后置修饰：something interesting。"},
+{c:"形容词和副词",q:"Please be quiet. The baby fell ____.",o:["asleeping","sleepy","asleep","slept"],a:2,x:"fall asleep 表示“入睡”，固定搭配；sleepy 表示“困的”。"},
+{c:"形容词和副词",q:"I have never seen ______.",o:["a three-hundreds-year-old tree","a three-hundred-year-old tree","a three hundred year old tree","a three-hundred-years-old tree"],a:1,x:"数词-名词用连字符连接做定语时，各部分都用单数：a three-hundred-year-old tree。"},
+{c:"形容词和副词",q:"Our school will hold a sports meeting ____ next week.",o:["some time","sometime","sometimes","some times"],a:1,x:"sometime 表示“（将来）某个时候”；sometimes 表示“有时”。"},
+{c:"形容词和副词",q:"____ lively place!",o:["What a","What","How lively","How a"],a:0,x:"what 开头的感叹句 + a + 形容词 + 名词：What a lively place!"},
+{c:"形容词和副词",q:"Although he was not very clever, his teacher spoke ___ of him.",o:["high","highly","had","badly"],a:1,x:"speak highly of sb 表示“夸奖某人”；highly 修饰抽象含义，high 修饰具体高度。"},
+{c:"形容词和副词",q:"—Did you buy those trousers?\n—No, the price is ___ expensive for me.",o:["very much","too much","so much","much too"],a:3,x:"much too 是副词短语，放在形容词之前：much too expensive（太贵了）。"},
+{c:"形容词和副词",q:"—How big are your shoes?\n—My shoes are ______ yours.",o:["as twice big as","as big twice as","as big as twice","twice as big as"],a:3,x:"“倍数 + as...as”结构：twice as big as yours。"},
+{c:"形容词和副词",q:"Keep your feet ____ while I fasten your shoes.",o:["quiet","silent","calm","still"],a:3,x:"still 表示“不动的、静止的”，指身体保持不动。"},
+{c:"形容词和副词",q:"—What can I do for you?\n—May I have ____ coffee?",o:["some","any","anyone","many"],a:0,x:"some 用于疑问句表示客气地请求（希望得到肯定回答）。"},
+{c:"形容词和副词",q:"His suggestion is worthy ____.",o:["to consider","of considering","of being considered","considering"],a:2,x:"be worthy of being done = be worth doing，表示“值得被做”。"},
+{c:"形容词和副词",q:"My handwriting _____ yours.",o:["is not as good as","are not as good as","is not good as","is not as well as"],a:0,x:"handwriting 单数用 is；“不如……好”用 not as/so good as。"},
+{c:"形容词和副词",q:"She is ___ of my two sisters.",o:["the cleverest","the cleverer","clever","as clever as"],a:1,x:"两者比较用比较级，且要加 the：the cleverer of my two sisters。"},
+{c:"形容词和副词",q:"He went to school much ___ .",o:["late yesterday","yesterday late","lately yesterday","yesterday lately"],a:0,x:"much 修饰 late 放在其前；时间副词 yesterday 放在句末。"},
+{c:"形容词和副词",q:"The family _____ is so noisy.",o:["which next door","it was next door","next to the door","was next door"],a:2,x:"next to the door 做后置定语修饰 the family，表示“挨着门的那户人”。"},
+{c:"形容词和副词",q:"My friends are ___ teachers.",o:["mostly","many","most","more"],a:0,x:"mostly 是副词，表示“大部分、主要地”：My friends are mostly teachers。"},
+{c:"形容词和副词",q:"He is one of ______.",o:["the greatest alive poet","the greatest alive poets","the greatest poets who are still alive","the greatest poet who are still alive"],a:2,x:"one of + 复数名词；alive 做后置定语或用 who are still alive 均可，只有 C 项语法完整。"},
+{c:"形容词和副词",q:"The Yellow River is _____ in China.",o:["the second longest river","the second longest rivers","a second longest river","the two longest river"],a:0,x:"“the + 序数词 + 最高级”表示“第几最……”：the second longest river。"},
+{c:"形容词和副词",q:"We were ____ when we won the football match.",o:["rather pleasing","rather pleased","rather please","rather to please"],a:1,x:"-ed 形容词修饰人（感到高兴的）：we were rather pleased。"},
+{c:"形容词和副词",q:"Although Albert Einstein was a great scientist, you can't say he is ______.",o:["wonderful","perfect","complete","splendid"],a:1,x:"perfect（完美的）是绝对形容词，不能说“不能说他完美”之外的评价语境中随意使用程度限定——此处考查 perfect 的绝对性。"},
+{c:"形容词和副词",q:"Work hard and you'll be ___ in the future.",o:["succeed","success","successful","successfully"],a:2,x:"be 动词后接形容词做表语：be successful。"},
+{c:"形容词和副词",q:"All people in the world are trying their best to make the earth more ____.",o:["beauty","beautify","beautifully","beautiful"],a:3,x:"make + 宾语 + 形容词：make the earth more beautiful。"},
+{c:"形容词和副词",q:"Would you please give me some ___ information besides this?",o:["far","farther","farthest","further"],a:3,x:"further information 表示“进一步/更详尽的信息”。"},
+{c:"形容词和副词",q:"Mary is a ___ girl and John is a ___ boy.",o:["handsome; beautiful","beautiful; handsome","beautiful; handsome","beautiful; beautiful"],a:1,x:"习惯搭配：beautiful girl（漂亮的女孩）、handsome boy（英俊的男孩）。"},
+{c:"形容词和副词",q:"A ____ lecture often makes students ____.",o:["boring; boring","bored; boring","bored; bored","boring; bored"],a:3,x:"-ing 修饰物（无趣的讲座），-ed 修饰人（感到无聊的学生）。"},
+{c:"形容词和副词",q:"John is badly ill. Please send for a doctor ____.",o:["as sooner as possible","as soon as possibly","as soon as possible","soon as possible"],a:2,x:"as soon as possible 表示“尽快”，固定短语。"},
+{c:"形容词和副词",q:"—Would you like to have a dinner with me?\n—Are you ____?",o:["free","careful","serious","true"],a:2,x:"Are you serious? 表示“你是认真的吗”。"},
+{c:"形容词和副词",q:"Henry said that he was ___ able to water the flowers himself.",o:["too","much","very","quite"],a:3,x:"be quite able to do sth 表示“完全能够做某事”，固定搭配。"},
+{c:"形容词和副词",q:"Peter is ___ fun that we all like him very much.",o:["such a great","such great","so great","so a great"],a:1,x:"fun 是不可数名词，前面不用冠词；such + 形容词 + 不可数名词：such great fun。"},
+{c:"形容词和副词",q:"He is the only boy ____ for the monitor position.",o:["lively","probably","possibly","possible"],a:3,x:"the only boy possible for the monitor position，possible 做后置定语，表示“适合班长这个职位的唯一男孩”。"},
+{c:"形容词和副词",q:"The village is only three hundred meters ______ from here.",o:["away","far away","far","faraway"],a:0,x:"具体距离 + away：three hundred meters away from here。"},
+{c:"形容词和副词",q:"—Could you tell me where the nearest post office is?\n—Go ___ and turn ___ at the first turning.",o:["straightly; left","straight; left","straight; the left","straightly; the left"],a:1,x:"straight 可做副词表示“径直地”；turn left 表示“左转”，不加冠词。"},
+{c:"形容词和副词",q:"All the ___ are interested in the ___.",o:["present students; present situation","present students; situation present","students present; present situation","students present; situation present"],a:2,x:"present 表示“出席的”时做后置定语（students present）；表示“目前的”时放在名词前（present situation）。"},
+{c:"形容词和副词",q:"Some students are playing basketball while the other students ______.",o:["are still doing their homework","are already doing their homework","are now doing their homework","are doing their homework now"],a:0,x:"while 表对比：“一些学生在打篮球，而另一些学生仍在做作业”，still 表示“仍然”。"},
+{c:"形容词和副词",q:"Light travels ___ than sound.",o:["too fast","much fast","very faster","much faster"],a:3,x:"much 可修饰比较级：much faster。"},
+{c:"形容词和副词",q:"The weather was ____ hot yesterday.",o:["very","pretty","rather","fairly"],a:2,x:"pretty 和 fairly 一般用于褒义形容词前，rather 一般用于贬义形容词前（hot weather 令人不适）。"},
+{c:"形容词和副词",q:"Jenny did ____ well in her exam, but you did ____ badly.",o:["rather; more","rather; fairly","fairly; rather","pretty; too"],a:2,x:"fairly 含褒义修饰“好”（did fairly well），rather 含不悦修饰“不好”（did rather badly）。"},
+{c:"形容词和副词",q:"He is ___ to go to school by himself.",o:["old enough","enough old","young enough","enough young"],a:0,x:"enough 修饰形容词时后置：old enough（年龄够大）。"},
+{c:"形容词和副词",q:"I'm ___ at English while my sister does ___ in politics.",o:["good; good","well; well","good; well","well; good"],a:2,x:"be good at 是固定搭配；do well in 表示“在……方面做得好”。"},
+{c:"形容词和副词",q:"—Are you excited about your university life?\n—______.",o:["Yes, very excited","Yes, very exciting","No, very bored","No, nothing at all"],a:0,x:"修饰人的感受用 -ed 形容词：Yes, very excited。"},
+{c:"形容词和副词",q:"—There are no mistakes in your paper.\n—Yes. I can not be too ____. ",o:["nervous","careful","careless","happy"],a:1,x:"can not be too careful 表示“再小心也不为过”。"},
+{c:"形容词和副词",q:"The town was so ____, and I didn't know where to go.",o:["strange","large","interesting","beautiful"],a:0,x:"strange 表示“陌生的”；“这个镇子很陌生，我不知该去哪”。"},
+{c:"形容词和副词",q:"I can't put this big television ___.",o:["everywhere","somewhere","anywhere","nowhere"],a:2,x:"否定句中用 anywhere：“这个大电视机哪儿也放不下”。"},
+{c:"形容词和副词",q:"You look ___ than you are.",o:["a more younger","more younger","very younger","much younger"],a:3,x:"much 修饰比较级，不加 more：much younger。"},
+{c:"形容词和副词",q:"He is ___ fatter than me.",o:["very","much","so","too"],a:1,x:"只有 much 可修饰比较级 fatter。"},
+{c:"形容词和副词",q:"The old lady lived ___, but she never felt ___.",o:["alone; lonely","lonely; alone","lone; lonely","alone; lone"],a:0,x:"alone 表示“独自”（客观），lonely 表示“孤独”（主观感受）。"},
+{c:"形容词和副词",q:"This is a ___ building in this city.",o:["much tall","pretty tall","prettily tall","tall pretty"],a:1,x:"pretty 做副词表示“相当”，修饰形容词放在其前：a pretty tall building。"},
+{c:"形容词和副词",q:"Was the dog ___ or dead?",o:["alive","lively","live","living"],a:0,x:"alive 表示“活着的”，常做表语或后置定语；live 作形容词表“现场的”。"},
+{c:"形容词和副词",q:"He hurt ___ in a ___ night.",o:["bad; dark","badly; dark","bad; darker","badly; darkly"],a:1,x:"hurt 用副词 badly 修饰；dark night（黑暗的夜晚）用形容词。"},
+{c:"形容词和副词",q:"Who can manage to do this job with ___ money and ___ people?",o:["little; less","little; fewer","less; fewer","less; few"],a:2,x:"money 不可数用 less（little 的比较级），people 可数用 fewer（few 的比较级）。"},
+{c:"形容词和副词",q:"This picture was painted one thousand years ago. So it is ____.",o:["costless","worthless","valuable","priceless"],a:3,x:"priceless 表示“无价的”；一千年前的画是“无价的”珍品。"},
+{c:"形容词和副词",q:"He is ___ of his ___ behavior.",o:["shameful; ashamed","shameless; ashamed","shameless; shameful","ashamed; shameful"],a:3,x:"be ashamed of 表示“对……感到羞愧”（修饰人）；shameful 修饰行为（可耻的）。"},
+{c:"形容词和副词",q:"The apples are ___ pears.",o:["twice as many as","as many as twice","twice as much as","as twice many as"],a:0,x:"“倍数 + as many as”结构，apples 可数用 many：twice as many as pears。"},
+{c:"形容词和副词",q:"Please keep ___ when you meet a sudden dangerous situation.",o:["quiet","calm","still","silent"],a:1,x:"keep calm 表示“保持冷静”。"},
+{c:"形容词和副词",q:"Although it was raining ___, yet ____ no one stopped working.",o:["heavy; nearly","heavily; nearly","heavy; almost","heavily; almost"],a:3,x:"rain heavily 用副词；almost 可用在 no/none/nobody/never 等否定词前，nearly 一般不可。"},
+{c:"形容词和副词",q:"—Will the exam be difficult?\n—No, it's ___ that all of the students can pass it.",o:["surely","certainly","sure","certain"],a:3,x:"sure 的主语只能是人；it is certain that... 中 certain 的主语可以是 it。"},
+{c:"形容词和副词",q:"I have never spent a ___ day.",o:["more worrying","most worrying","more worry","most worried"],a:0,x:"“never/not + a/an + 比较级”相当于最高级：never a more worrying day（最令人担忧的一天）。"},
+{c:"形容词和副词",q:"When we got to Mountain Tai, we saw the ____ sun rising.",o:["burnt","gold","golden","brightly"],a:2,x:"golden 是形容词表示“金色的”：the golden sun（金色的太阳）。"},
+{c:"形容词和副词",q:"South Africa is ____ country.",o:["an English-spoken","a speaking-English","a spoken-English","an English-speaking"],a:3,x:"English-speaking country 表示“讲英语的国家”，合成形容词。"},
+{c:"形容词和副词",q:"Those who are _____ with the progress they have made will not have greater success.",o:["proud","afraid","popular","content"],a:3,x:"be content with 表示“对……满足”；满足于现有进步就不会有更大成功。"},
+{c:"形容词和副词",q:"—Who is ___ to win the game?\n—I think it is ___ for Peter to win.",o:["probably; likely","possible; probably","likely; probably","likely; possible"],a:3,x:"likely 是唯一可以用人做主语的“可能的”词：Who is likely to...；possible 的主语一般用 it：it is possible for sb to do。"},
+{c:"形容词和副词",q:"I have four sisters, all ___ than me. _____ Jenny is a teacher.",o:["elder; The eldest","older; The older","elder; The old one","older; The eldest"],a:3,x:"older 指年龄比较（可接 than），elder 指长幼辈分（不接 than）；the eldest 表示“最年长的”。"}
+];
+
+/* ================== 应用逻辑 ================== */
+const CATS = [...new Set(BANK.map(q=>q.c))];
+const LS_WRONG = "eng2_wrong_ids";
+const app = document.getElementById("app");
+let state = null;
+
+function getWrong(){ try{ return JSON.parse(localStorage.getItem(LS_WRONG)||"[]"); }catch(e){ return []; } }
+function saveWrong(ids){ localStorage.setItem(LS_WRONG, JSON.stringify(ids)); }
+function toggleWrong(id){
+  let w = getWrong();
+  if(w.includes(id)) w = w.filter(x=>x!==id); else w.push(id);
+  saveWrong(w);
+}
+
+/* ---- 练习进度持久化 ---- */
+const LS_SESSION = "eng2_session";
+function saveSession(){
+  if(!state || !state.qs) return;
+  try{
+    localStorage.setItem(LS_SESSION, JSON.stringify({
+      ids: state.qs.map(q=>BANK.indexOf(q)),
+      idx: state.idx,
+      results: state.results.map(r=>r===undefined?null:r),
+      mode: state.mode
+    }));
+  }catch(e){}
+}
+function loadSession(){
+  try{
+    const d = JSON.parse(localStorage.getItem(LS_SESSION)||"null");
+    if(!d || !Array.isArray(d.ids) || !d.ids.length || d.ids.some(i=>i<0||i>=BANK.length)) return null;
+    return { ids:d.ids, idx:d.idx, results:(d.results||[]).map(r=>r===null?undefined:r), mode:d.mode||"order" };
+  }catch(e){ return null; }
+}
+
+/* ---------- 首页 ---------- */
+function renderHome(){
+  const wrong = getWrong().filter(i=>i<BANK.length);
+  const sess = loadSession();
+  let resumeHtml = "";
+  if(sess && sess.idx < sess.ids.length){
+    const answeredN = sess.results.filter(r=>r===true||r===false).length;
+    if(answeredN > 0){
+      resumeHtml = `<button class="btn block" id="resumeBtn" style="background:var(--green)">继续上次练习（第 ${sess.idx+1} / ${sess.ids.length} 题，已答 ${answeredN} 题）</button>
+    <button class="btn ghost block" id="startBtn">开始新的一轮练习</button>`;
+    }
+  }
+  let catsHtml = CATS.map((c,i)=>{
+    const cnt = BANK.filter(q=>q.c===c).length;
+    return `<div class="cat-item on" data-i="${i}"><span>${c}</span><span class="cnt">${cnt}题</span></div>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="card">
+    <h1>继教《英语2》考试补充语法练习</h1>
+    <div class="sub">共 ${BANK.length} 道题 · 点击选项立即判定 · 附答案解析 · 可反复练习</div>
+    <h2>选择练习范围</h2>
+    <div class="cat-grid" id="catGrid">${catsHtml}</div>
+    <div class="mode-row" id="modeRow">
+      <div class="mode-tag on" data-m="order">顺序练习</div>
+      <div class="mode-tag" data-m="random">随机打乱</div>
+      ${wrong.length?`<div class="mode-tag" data-m="wrong">只练错题（${wrong.length}）</div>`:""}
+    </div>
+    ${resumeHtml || `<button class="btn block" id="startBtn">开始练习</button>`}
+    ${wrong.length?`<button class="btn ghost block" id="clearWrongBtn">清空错题本（当前 ${wrong.length} 题）</button>`:""}
+  </div>
+  <div class="card">
+    <div class="sub" style="margin:0">提示：做错的题会自动记入错题本（保存在本机），下次可选“只练错题”进行针对性复习。建议先做题，再看答案解析。</div>
+  </div>`;
+
+  const sel = new Set(CATS.map((c,i)=>i));
+  let mode = "order";
+  document.querySelectorAll(".cat-item").forEach(el=>{
+    el.onclick = ()=>{
+      const i = +el.dataset.i;
+      if(sel.has(i)){ sel.delete(i); el.classList.remove("on"); }
+      else { sel.add(i); el.classList.add("on"); }
+    };
+  });
+  document.querySelectorAll(".mode-tag").forEach(el=>{
+    el.onclick = ()=>{
+      mode = el.dataset.m;
+      document.querySelectorAll(".mode-tag").forEach(x=>x.classList.remove("on"));
+      el.classList.add("on");
+    };
+  });
+  document.getElementById("startBtn").onclick = ()=>{
+    let qs;
+    if(mode==="wrong"){
+      qs = getWrong().map(i=>BANK[i]).filter(Boolean);
+    } else {
+      qs = BANK.filter((q,i)=>sel.has(CATS.indexOf(q.c)));
+      if(mode==="random") qs = shuffle([...qs]);
+    }
+    if(!qs.length){ alert("请至少选择一个分类，或题数为空"); return; }
+    state = { qs, idx:0, results:[], mode };
+    renderQuiz();
+  };
+  const cw = document.getElementById("clearWrongBtn");
+  if(cw) cw.onclick = ()=>{ if(confirm("确定清空错题本？")){ saveWrong([]); renderHome(); } };
+  const rb = document.getElementById("resumeBtn");
+  if(rb) rb.onclick = ()=>{
+    state = { qs: sess.ids.map(i=>BANK[i]).filter(Boolean), idx: sess.idx, results: sess.results, mode: sess.mode };
+    renderQuiz();
+  };
+}
+
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+/* ---------- 答题页 ---------- */
+function renderQuiz(){
+  const { qs, idx, results } = state;
+  const q = qs[idx];
+  const id = BANK.indexOf(q);
+  const isWrongSaved = getWrong().includes(id);
+  app.innerHTML = `
+  <div class="topbar">
+    <span class="badge">${q.c}</span>
+    <button class="linklike" id="quitBtn">← 退出并查看成绩</button>
+  </div>
+  <div class="card">
+    <div class="progress-wrap">
+      <span style="font-size:13px;color:var(--muted)">${idx+1} / ${qs.length}</span>
+      <div class="progress-bar"><i style="width:${(idx/qs.length)*100}%"></i></div>
+      <span style="font-size:13px;color:var(--muted)">✓${results.filter(r=>r===true).length} ✗${results.filter(r=>r===false).length}</span>
+    </div>
+    <div class="question">${escapeHtml(q.q)}</div>
+    <div id="opts">
+      ${q.o.map((o,i)=>`<button class="opt" data-i="${i}">${"ABCD"[i]}. ${escapeHtml(o)}</button>`).join("")}
+    </div>
+    <div id="feedback"></div>
+    <div class="nav-row">
+      <button class="btn ghost" id="prevBtn" ${idx===0?"disabled":""}>上一题</button>
+      <button class="btn" id="nextBtn">${idx===qs.length-1?"查看成绩":"下一题"}</button>
+    </div>
+  </div>`;
+
+  const optsEl = document.getElementById("opts");
+  // 注意：answered 必须用 let，答题后要更新，否则点“下一题”会误判为未作答
+  let answered = results[idx] !== undefined;
+  function showResult(ok){
+    document.getElementById("feedback").innerHTML = `
+      <div class="explain"><b>答案：${"ABCD"[q.a]}</b> ${ok?"回答正确 ✅":"回答错误 ❌"}${q.x?`\n📖 解析：${escapeHtml(q.x)}`:""}</div>`;
+    document.getElementById("nextBtn").focus();
+  }
+  function applyAnswer(picked){
+    const buttons = [...optsEl.children];
+    buttons.forEach(b=>b.disabled = true);
+    const ok = picked === q.a;
+    state.results[idx] = ok;
+    if(!ok) toggleWrong(id); else if(isWrongSaved) toggleWrong(id);
+    buttons[q.a].classList.add("correct");
+    if(!ok) buttons[picked].classList.add("wrong");
+    answered = true;
+    saveSession();
+    showResult(ok);
+  }
+  // 回看已作答的题：直接展示正确答案与结果（不重复计分）
+  if(answered){
+    [...optsEl.children].forEach(b=>b.disabled = true);
+    optsEl.children[q.a].classList.add("correct");
+    showResult(results[idx] === true);
+  }
+  optsEl.onclick = e=>{
+    const b = e.target.closest(".opt");
+    if(!b || answered) return;
+    applyAnswer(+b.dataset.i);
+  };
+  document.getElementById("prevBtn").onclick = ()=>{ if(state.idx>0){ state.idx--; renderQuiz(); } };
+  document.getElementById("nextBtn").onclick = ()=>{
+    if(!answered && !confirm("本题尚未作答，确定跳过？")) return;
+    if(state.idx===qs.length-1) renderResult();
+    else { state.idx++; renderQuiz(); }
+  };
+  document.getElementById("quitBtn").onclick = renderResult;
+  saveSession();
+}
+
+/* ---------- 成绩页 ---------- */
+function renderResult(){
+  const { qs, results } = state;
+  // 整轮全部作答完毕则清除进度存档（提前退出的情况保留，便于下次继续）
+  if(results.length === qs.length && results.every(r=>r===true||r===false)){
+    try{ localStorage.removeItem(LS_SESSION); }catch(e){}
+  }
+  const total = results.filter(r=>r===true).length;
+  const wrongList = qs.map((q,i)=>({q, ok:results[i]})).filter(x=>x.ok===false);
+  const rate = results.filter(r=>r!==undefined).length ? Math.round(total/Math.max(results.filter(r=>r!==undefined).length,1)*100) : 0;
+  app.innerHTML = `
+  <div class="card">
+    <h2>练习成绩</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">${qs.length}</div><div class="lbl">题目总数</div></div>
+      <div class="stat good"><div class="num">${total}</div><div class="lbl">答对</div></div>
+      <div class="stat bad"><div class="num">${wrongList.length}</div><div class="lbl">答错/跳过</div></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar"><i style="width:${rate}%"></i></div><span>${rate}%</span></div>
+    <button class="btn block" id="againBtn">再来一轮（重新练习）</button>
+    ${wrongList.length?`<button class="btn ghost block" id="redoWrongBtn">只重练本轮错题（${wrongList.length} 题）</button>`:""}
+    <button class="btn ghost block" id="homeBtn">返回首页 / 换分类</button>
+  </div>
+  ${wrongList.length?`<div class="card"><h2>错题回顾</h2>${wrongList.map(({q})=>{
+    const id = BANK.indexOf(q);
+    return `<div class="review-item">
+      <div class="rq">${escapeHtml(q.q)}</div>
+      <div class="ra">正确答案：${"ABCD"[q.a]}. ${escapeHtml(q.o[q.a])}</div>
+      ${q.x?`<div class="rx">📖 ${escapeHtml(q.x)}</div>`:""}
+      <div class="rx" style="margin-top:6px"><button class="linklike" data-id="${id}" style="padding:0">移出错题本</button></div>
+    </div>`;}).join("")}</div>`:""}
+  ${!wrongList.length?`<div class="card empty-tip">全部答对，太棒了！🎉</div>`:""}`;
+
+  document.getElementById("againBtn").onclick = ()=>{
+    state = { qs: shuffle([...state.qs]), idx:0, results:[], mode:state.mode };
+    renderQuiz();
+  };
+  const rw = document.getElementById("redoWrongBtn");
+  if(rw) rw.onclick = ()=>{
+    const qs2 = wrongList.map(x=>x.q);
+    state = { qs: shuffle([...qs2]), idx:0, results:[], mode:"wrong" };
+    renderQuiz();
+  };
+  document.getElementById("homeBtn").onclick = renderHome;
+  app.querySelectorAll(".review-item .linklike").forEach(b=>{
+    b.onclick = ()=>{ toggleWrong(+b.dataset.id); b.textContent="已移出错题本"; b.disabled=true; };
+  });
+}
+
+function escapeHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+renderHome();
+</script>
+</body>
+</html>
